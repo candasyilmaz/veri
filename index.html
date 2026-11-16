@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GIGO Simülasyonu: Doğru Veri Girişi</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f2f5f1;--card:#fff;--fg:#1b2a2a;--mut:#5b6b6b;--bd:#cfd9d4;--ac:#0f5c5c;--ac-fg:#fff;--ok:#1d7a3e;--okbg:#e2f3e8;--bad:#b3261e;--badbg:#fbe7e5;--warn:#8a5a00;--warnbg:#fdf0d5;--sel:#dcebf7;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121a1a;--card:#1b2626;--fg:#e6efec;--mut:#9fb2ad;--bd:#324341;--ac:#5fc2b8;--ac-fg:#0a1615;--ok:#6fd392;--okbg:#17321f;--bad:#ff8a80;--badbg:#3a1b19;--warn:#f2c366;--warnbg:#38290c;--sel:#1e3a52;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121a1a;--card:#1b2626;--fg:#e6efec;--mut:#9fb2ad;--bd:#324341;--ac:#5fc2b8;--ac-fg:#0a1615;--ok:#6fd392;--okbg:#17321f;--bad:#ff8a80;--badbg:#3a1b19;--warn:#f2c366;--warnbg:#38290c;--sel:#1e3a52;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 "Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:920px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:1.7rem;margin:0 0 4px;letter-spacing:-.01em}
+h2{font-size:1.25rem;margin:0 0 6px}
+p{margin:6px 0}
+.sub{color:var(--mut);margin-bottom:16px}
+nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+nav button{padding:9px 14px;border:1px solid var(--bd);background:var(--card);color:var(--fg);border-radius:8px;font:inherit;font-weight:600;cursor:pointer}
+nav button[aria-selected="true"]{background:var(--ac);color:var(--ac-fg);border-color:var(--ac)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+section{display:none;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:18px}
+section.on{display:block}
+.btn{padding:9px 16px;border:0;border-radius:8px;background:var(--ac);color:var(--ac-fg);font:inherit;font-weight:600;cursor:pointer}
+.btn.alt{background:transparent;color:var(--fg);border:1px solid var(--bd)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:480px}
+th,td{border:1px solid var(--bd);padding:0;text-align:left}
+th{padding:8px 10px;background:var(--bg);font-size:.9rem}
+td.p{padding:8px 10px}
+td button{width:100%;min-height:42px;padding:8px 10px;border:0;background:transparent;color:var(--fg);font:inherit;text-align:left;cursor:pointer}
+td button.sel{background:var(--sel);box-shadow:inset 0 0 0 2px var(--ac)}
+td button.hit{background:var(--okbg);box-shadow:inset 0 0 0 2px var(--ok)}
+td button.miss{background:var(--warnbg);box-shadow:inset 0 0 0 2px var(--warn)}
+td button.fp{background:var(--badbg);box-shadow:inset 0 0 0 2px var(--bad)}
+.note{padding:10px 12px;border-radius:8px;background:var(--bg);border:1px solid var(--bd);margin:10px 0}
+.ok{background:var(--okbg);color:var(--ok);border-color:var(--ok)}
+.bad{background:var(--badbg);color:var(--bad);border-color:var(--bad)}
+.warn{background:var(--warnbg);color:var(--warn);border-color:var(--warn)}
+ul.res{padding-left:18px}
+ul.res li{margin:5px 0}
+.tag{display:inline-block;padding:1px 8px;border-radius:99px;font-size:.8rem;font-weight:600;border:1px solid var(--bd);margin-left:4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+label{display:block;font-weight:600;font-size:.92rem;margin-bottom:10px}
+input[type=text],input[type=number],select{display:block;width:100%;margin-top:4px;padding:9px 10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--fg);font:inherit}
+.err{color:var(--bad);font-size:.85rem;font-weight:400;margin-top:3px}
+.sw{display:flex;align-items:center;gap:10px;font-weight:600;margin:6px 0 14px}
+.sw input{width:20px;height:20px}
+.bars{display:grid;gap:10px;margin:14px 0}
+.bar{height:34px;border-radius:6px;background:var(--ac);color:var(--ac-fg);display:flex;align-items:center;padding:0 10px;font-weight:600;white-space:nowrap;min-width:90px;transition:width .3s}
+.bar.b2{background:var(--warn);color:var(--bg)}
+.bar.b3{background:var(--bad);color:var(--bg)}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:10px 12px;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--fg);font:inherit;cursor:pointer}
+.opt:disabled{cursor:default}
+.opt.right{background:var(--okbg);border-color:var(--ok)}
+.opt.wrong{background:var(--badbg);border-color:var(--bad)}
+input[type=range]{width:100%;accent-color:var(--ac)}
+</style>
+</head>
+<body>
+<main>
+<h1>GIGO Simülasyonu</h1>
+<p class="sub">Çöp girerse çöp çıkar. Dört uygulamada hatayı bulun, önleyin ve maliyetini görün.</p>
+<nav role="tablist">
+<button role="tab" aria-selected="true" data-t="t1">1. Hata avcısı</button>
+<button role="tab" aria-selected="false" data-t="t2">2. Veri giriş formu</button>
+<button role="tab" aria-selected="false" data-t="t3">3. Maliyet (1-10-100)</button>
+<button role="tab" aria-selected="false" data-t="t4">4. Vaka sınavı</button>
+</nav>
+
+<section id="t1" class="on">
+<h2>Hata avcısı</h2>
+<p>Satış tablosunda hatalı olduğunu düşündüğünüz hücrelere tıklayın. Standart biçim: ad soyad düzgün yazılmış, tarih GG.AA.YYYY, tutar pozitif sayı, şehir dolu ve doğru yazılmış. Sonra “Kontrol et” ile sonucu görün.</p>
+<div class="scroll"><table id="tbl"></table></div>
+<div class="row"><button class="btn" id="chk">Kontrol et</button><button class="btn alt" id="rst">Sıfırla</button></div>
+<div id="r1"></div>
+</section>
+
+<section id="t2">
+<h2>Veri giriş formu</h2>
+<p>Aynı formu doğrulama kapalı ve açık kullanın. Sonra raporda GIGO’nun etkisini görün.</p>
+<div class="sw"><input type="checkbox" id="val" aria-label="Doğrulama kuralları"><label for="val" style="margin:0">Doğrulama kuralları açık</label></div>
+<div class="grid">
+<label>Ad soyad<input type="text" id="f_ad"><span class="err" id="e_ad"></span></label>
+<label>Yaş<input type="text" id="f_yas" inputmode="numeric"><span class="err" id="e_yas"></span></label>
+<label>E-posta<input type="text" id="f_em"><span class="err" id="e_em"></span></label>
+<label>Şehir<input type="text" id="f_sh" list="cities"><span class="err" id="e_sh"></span></label>
+<label>Tutar (TL)<input type="text" id="f_tu" inputmode="decimal"><span class="err" id="e_tu"></span></label>
+</div>
+<datalist id="cities"><option>İstanbul</option><option>Ankara</option><option>İzmir</option><option>Bursa</option></datalist>
+<div class="row"><button class="btn" id="add">Kaydı ekle</button><button class="btn alt" id="demo">Kirli örnek kayıtlar ekle</button><button class="btn alt" id="clr">Tümünü temizle</button></div>
+<div id="msg"></div>
+<div id="rep"></div>
+</section>
+
+<section id="t3">
+<h2>Maliyet: 1-10-100 kuralı</h2>
+<p>Hatayı girişte önlemek 1 birim, sonradan temizlemek 10 birim, hatalı veriyle karar almak 100 birimdir. Bu oranlar sezgisel bir büyüklük mertebesidir, ölçüm değildir.</p>
+<label>Kayıt sayısı: <b id="o_n"></b><input type="range" id="s_n" min="1000" max="100000" step="1000" value="20000"></label>
+<label>Hata oranı: <b id="o_r"></b><input type="range" id="s_r" min="1" max="20" value="5"></label>
+<label>Önleme maliyeti (hata başına TL)<input type="number" id="s_u" value="2" min="0.1" step="0.1"></label>
+<div class="bars" id="bars"></div>
+<div class="note" id="c_note"></div>
+</section>
+
+<section id="t4">
+<h2>Vaka sınavı</h2>
+<div id="qz"></div>
+</section>
+</main>
+
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt=n=>Math.round(n).toLocaleString("tr-TR");
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("nav button").forEach(x=>x.setAttribute("aria-selected",x===b));
+  document.querySelectorAll("section").forEach(s=>s.classList.toggle("on",s.id===b.dataset.t));
+});
+
+/* ---- 1. Hata avcısı ---- */
+const H=["Müşteri","Şehir","Tutar","Tarih"];
+const D=[["Ali Yılmaz","İstanbul","1.200","03.04.2026"],["ali yilmaz","İstanbul","1200","2026-04-03"],["Ayşe Kaya","Ankra","-450","15/04/2026"],["Mehmet Demir","İzmir","12000000","04.05.2026"],["Fatma Çelik","","800","31.02.2026"]];
+const E={"1,0":["Mükerrer kayıt (aynı kişi farklı yazılmış)","Benzersizlik","Benzersiz anahtar ve mükerrer kontrolü"],
+"1,3":["Tarih biçimi farklı (YYYY-AA-GG)","Tutarlılık","Tarih seçici, tek biçim"],
+"2,1":["Yazım hatası (Ankra)","Doğruluk","Açılır liste"],
+"2,2":["Negatif tutar (iade mi hata mı?)","Geçerlilik","Aralık kontrolü, iade için ayrı alan"],
+"2,3":["Tarih biçimi farklı (/ ile yazılmış)","Tutarlılık","Tarih seçici, maske"],
+"3,2":["Aykırı değer, muhtemelen fazladan sıfır","Doğruluk","Mantık kontrolü (sanity check)"],
+"4,1":["Eksik şehir","Eksiksizlik","Zorunlu alan"],
+"4,3":["Geçersiz tarih (31 Şubat)","Geçerlilik","Tarih doğrulaması"]};
+let sel=new Set(),done=false;
+function draw(){
+  let h="<tr>"+H.map(x=>"<th>"+x+"</th>").join("")+"</tr>";
+  D.forEach((r,i)=>{h+="<tr>"+r.map((v,j)=>{
+    const k=i+","+j;let c="";
+    if(done){const e=k in E,s=sel.has(k);c=e&&s?"hit":e?"miss":s?"fp":""}
+    else if(sel.has(k))c="sel";
+    return `<td><button class="${c}" data-k="${k}" aria-pressed="${sel.has(k)}">${v===""?"(boş)":esc(v)}</button></td>`}).join("")+"</tr>"});
+  $("#tbl").innerHTML=h;
+  $("#tbl").querySelectorAll("button").forEach(b=>b.onclick=()=>{if(done)return;const k=b.dataset.k;sel.has(k)?sel.delete(k):sel.add(k);draw()});
+}
+$("#chk").onclick=()=>{
+  done=true;draw();
+  const keys=Object.keys(E);const hit=keys.filter(k=>sel.has(k)).length;
+  const fp=[...sel].filter(k=>!(k in E)).length;
+  let h=`<div class="note ${hit==keys.length&&!fp?"ok":"warn"}"><b>${hit}/${keys.length} hata bulundu</b>, ${fp} yanlış alarm. Yeşil: bulundu, sarı: kaçırıldı, kırmızı: hatalı değil.</div><ul class="res">`;
+  keys.forEach(k=>{const e=E[k];h+=`<li>${sel.has(k)?"✔":"✘"} <b>${e[0]}</b><span class="tag">${e[1]}</span><br><span style="color:var(--mut)">Girişte önlem: ${e[2]}</span></li>`});
+  $("#r1").innerHTML=h+"</ul>";
+};
+$("#rst").onclick=()=>{sel=new Set();done=false;$("#r1").innerHTML="";draw()};
+draw();
+
+/* ---- 2. Form ---- */
+const CITIES=["İstanbul","Ankara","İzmir","Bursa"];
+let R=[];
+function check(v,prev){
+  const e={};
+  if(!/^[A-Za-zÇĞİÖŞÜçğıöşü]{2,}(\s+[A-Za-zÇĞİÖŞÜçğıöşü]{2,})+$/.test(v.ad.trim()))e.ad="Ad ve soyadı harflerle, iki kelime olarak girin.";
+  if(!/^\d{1,3}$/.test(v.yas)||+v.yas<0||+v.yas>120)e.yas="Yaş 0-120 arasında bir tam sayı olmalı.";
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.em))e.em="Geçerli e-posta girin (ör. ad@firma.com).";
+  if(!CITIES.includes(v.sh))e.sh="Listeden bir şehir seçin (İstanbul, Ankara, İzmir, Bursa).";
+  const t=Number(v.tu.replace(",","."));
+  if(v.tu===""||isNaN(t)||t<=0)e.tu="Tutar sıfırdan büyük bir sayı olmalı.";
+  else if(t>100000)e.tu="Olağan dışı yüksek tutar (100.000 TL üstü). Fazladan sıfır olabilir, kontrol edin.";
+  if(!e.ad&&!e.em&&prev.some(r=>r.ad.trim().toLowerCase()===v.ad.trim().toLowerCase()&&r.em.toLowerCase()===v.em.toLowerCase()))e.ad="Bu kişi zaten kayıtlı (mükerrer).";
+  return e;
+}
+const val=()=>({ad:$("#f_ad").value,yas:$("#f_yas").value,em:$("#f_em").value,sh:$("#f_sh").value,tu:$("#f_tu").value});
+function put(v,force){
+  const e=check(v,R);
+  ["ad","yas","em","sh","tu"].forEach(k=>$("#e_"+k).textContent="");
+  if($("#val").checked&&!force&&Object.keys(e).length){
+    for(const k in e)$("#e_"+k).textContent=e[k];
+    $("#msg").innerHTML='<div class="note bad">Kayıt reddedildi. Hatalar alanların altında yazıyor.</div>';return;
+  }
+  R.push({...v,ok:!Object.keys(e).length,tut:Number(String(v.tu).replace(",","."))||0});
+  $("#msg").innerHTML=`<div class="note ${Object.keys(e).length?"warn":"ok"}">Kayıt eklendi.${Object.keys(e).length?" Doğrulama kapalı olduğu için hatalı veri sisteme girdi.":""}</div>`;
+  ["ad","yas","em","sh","tu"].forEach(k=>$("#f_"+(k=="em"?"em":k=="ad"?"ad":k=="yas"?"yas":k=="sh"?"sh":"tu")).value="");
+  report();
+}
+function report(){
+  if(!R.length){$("#rep").innerHTML="";return}
+  const bad=R.filter(r=>!r.ok).length,q=Math.round(100*(R.length-bad)/R.length);
+  const by={};R.forEach(r=>{by[r.sh||"(boş)"]=(by[r.sh||"(boş)"]||0)+r.tut});
+  const tot=R.reduce((a,r)=>a+r.tut,0);
+  let h=`<h2 style="margin-top:18px">Rapor</h2><div class="note ${q==100?"ok":q>=70?"warn":"bad"}">Veri kalitesi skoru: <b>%${q}</b> (${R.length} kayıttan ${bad} tanesi kurallara aykırı). Toplam satış: <b>${fmt(tot)} TL</b></div>`;
+  h+='<div class="scroll"><table><tr><th>Şehir bazlı toplam (rapor çıktısı)</th><th>Tutar (TL)</th></tr>'+Object.entries(by).map(([k,v])=>`<tr><td class="p">${esc(k)}</td><td class="p">${fmt(v)}</td></tr>`).join("")+"</table></div>";
+  h+='<p style="color:var(--mut)">“İstanbul”, “istanbul” ve “IST” ayrı satırlar olarak görünüyorsa rapor çalışıyor ama yanlış: GIGO budur.</p>';
+  h+='<div class="scroll"><table><tr><th>Ad soyad</th><th>Yaş</th><th>E-posta</th><th>Şehir</th><th>Tutar</th><th>Durum</th></tr>'+R.map(r=>`<tr><td class="p">${esc(r.ad)}</td><td class="p">${esc(r.yas)}</td><td class="p">${esc(r.em)}</td><td class="p">${esc(r.sh)}</td><td class="p">${esc(r.tu)}</td><td class="p">${r.ok?"✔":"✘ hatalı"}</td></tr>`).join("")+"</table></div>";
+  $("#rep").innerHTML=h;
+}
+$("#add").onclick=()=>put(val(),false);
+$("#demo").onclick=()=>{[{ad:"ali yilmaz",yas:"-5",em:"ali@",sh:"istanbul",tu:"1200"},{ad:"Ali Yılmaz",yas:"34",em:"ali@firma.com",sh:"İstanbul",tu:"1200"},{ad:"Ali Yılmaz",yas:"34",em:"ali@firma.com",sh:"IST",tu:"1200"},{ad:"Ayşe Kaya",yas:"29",em:"ayse@firma.com",sh:"Ankra",tu:"12000000"},{ad:"asdf",yas:"430",em:"x",sh:"",tu:"-450"}].forEach(v=>put(v,true));$("#msg").innerHTML='<div class="note warn">5 kirli kayıt eklendi (doğrulamayı atlayarak). Raporu inceleyin.</div>'};
+$("#clr").onclick=()=>{R=[];$("#rep").innerHTML="";$("#msg").innerHTML=""};
+
+/* ---- 3. Maliyet ---- */
+function cost(){
+  const n=+$("#s_n").value,r=+$("#s_r").value,u=+$("#s_u").value,e=n*r/100;
+  $("#o_n").textContent=fmt(n);$("#o_r").textContent="%"+r+" ("+fmt(e)+" hatalı kayıt)";
+  const c=[e*u,e*u*10,e*u*100],m=c[2];
+  const names=["Önleme (girişte doğrulama)","Düzeltme (veri temizleme)","Başarısızlık (hatalı karar)"];
+  $("#bars").innerHTML=c.map((v,i)=>`<div><div style="font-weight:600">${names[i]}</div><div class="bar ${i?"b"+(i+1):""}" style="width:${Math.max(18,v/m*100)}%">${fmt(v)} TL</div></div>`).join("");
+  $("#c_note").innerHTML=`Aynı ${fmt(e)} hata, girişte yakalanırsa <b>${fmt(c[0])} TL</b>, karar verildikten sonra fark edilirse <b>${fmt(c[2])} TL</b> tutar. Fark: <b>${fmt(c[2]-c[0])} TL</b>.`;
+}
+["s_n","s_r","s_u"].forEach(i=>$("#"+i).oninput=cost);cost();
+
+/* ---- 4. Sınav ---- */
+const Q=[
+["Mars Climate Orbiter (1999): bir ekip pound-force saniye, diğeri newton saniye kullandı. Ana sorun nedir?",["Tutarlılık (birim standardı)","Güncellik","Benzersizlik"],0,"Birim ve biçim standardı veri sözlüğünde tanımlanmalı. Alan adına birim yazın (Ağırlık_kg)."],
+["Mizuho (2005): “1 adet 610.000 yen” yerine “610.000 adet 1 yen” girildi. En etkili önlem hangisi?",["Çift giriş yapmak veya mantık kontrolü (sanity check) eklemek","Raporları daha sık yazdırmak","Personeli değiştirmek"],0,"Fiyat ve adet için makul aralık kontrolü bu hatayı girişte durdururdu."],
+["Excel “SEPT2” gen adını tarihe çevirdi. Bu hangi önleme işaret eder?",["Mükerrer kontrolü","Giriş öncesi veri tipini (metin) tanımlamak","Kayıtları silmek"],1,"Araç veriyi sessizce değiştirebilir. Sütunları baştan metin olarak tanımlayın."],
+["İngiltere’de eski .xls satır sınırı yüzünden yaklaşık 16.000 COVID vakası sayıma girmedi. Hangi boyut bozuldu?",["Eksiksizlik (araç sınırı nedeniyle veri kaybı)","Doğruluk (yazım)","Benzersizlik"],0,"Aracın sınırlarını bilmek veri kalitesinin parçasıdır. Aktarım sonrası kayıt sayısı eşleştirilmeli."],
+["Amazon’un geçmiş işe alım verisiyle eğitilen modeli kadın adaylara olumsuz yaklaştı. Sorun ne?",["Yazım hataları","Temsil edilebilirlik ve önyargı: kayıtlar doğru ama çarpık","Format tutarsızlığı"],1,"GIGO yalnızca yazım hatası değildir. Geçmişin önyargısı da “garbage” olabilir."]];
+let qi=0,sc=0;
+function ask(){
+  if(qi>=Q.length){$("#qz").innerHTML=`<div class="note ok"><b>Sınav bitti: ${sc}/${Q.length}</b></div><button class="btn" id="qr">Yeniden başla</button>`;$("#qr").onclick=()=>{qi=0;sc=0;ask()};return}
+  const q=Q[qi];
+  $("#qz").innerHTML=`<p style="color:var(--mut)">Soru ${qi+1}/${Q.length}</p><p><b>${q[0]}</b></p>`+q[1].map((o,i)=>`<button class="opt" data-i="${i}">${o}</button>`).join("")+'<div id="fb"></div>';
+  document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.i;document.querySelectorAll(".opt").forEach(x=>x.disabled=true);
+    document.querySelectorAll(".opt")[q[2]].classList.add("right");
+    if(i==q[2])sc++;else b.classList.add("wrong");
+    $("#fb").innerHTML=`<div class="note ${i==q[2]?"ok":"bad"}">${i==q[2]?"Doğru.":"Yanlış."} ${q[3]}</div><button class="btn" id="nx">${qi==Q.length-1?"Sonucu gör":"Sonraki soru"}</button>`;
+    $("#nx").onclick=()=>{qi++;ask()};
+  });
+}
+ask();
+</script>
+</body>
+</html>
